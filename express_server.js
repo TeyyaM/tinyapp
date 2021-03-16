@@ -19,6 +19,9 @@ const generateRandomString = () => {
       shortURL += alphabet.charAt(num);
     }
   }
+  if (shortURL in urlDatabase) {
+    shortURL = generateRandomString();
+  }
   return shortURL;
 };
 
