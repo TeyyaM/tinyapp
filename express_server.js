@@ -1,8 +1,26 @@
 const morgan = require('morgan');
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
+
 const PORT = 8080; // default port 8080
+
+const generateRandomString = () => {
+  let shortURL = "";
+  let alphabet = "abcdefghijklmnopqrstuvwxyz";
+  while (shortURL.length < 6) {
+    let num = Math.floor(Math.random() * 36);
+    if (num <= 9) {
+      shortURL += num;
+    } else {
+      num -= 10;
+      shortURL += alphabet.charAt(num);
+    }
+  }
+  return shortURL;
+};
 
 // Saved urls
 const urlDatabase = {
@@ -19,6 +37,15 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render('urls_new');
 });
 
 app.get("/urls.json", (req, res) => {
