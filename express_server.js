@@ -56,6 +56,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// For Logouts!
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 // Adds new shortURL:longURL key:value pair and redirects
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString()

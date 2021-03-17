@@ -5,26 +5,29 @@
       aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
+    </div>
     <%if (username) {%>
-      <a class="card-title" style="margin: 1em">
-        <%=username%>
+      <a class="text-right" style="margin: 1em;">
+        Logged in as: <%=username%>
       </a>
+      <form action="/logout" method="POST">
+        <button type="submit" name="logout" class="btn btn-primary">Logout</button>
+      </form>
       <%}%>
         <%if (!username) {%>
           <form class="form-center" action="/login" method="POST">
             <div class="form-group mb-2">
-              <label for="username">name=</label>
+              <label for="username"></label>
               <input class="form-control-center" type="text" name="username" placeholder="username"
-                style="width: 300px; margin: 1em;">
+                style="width: 300px; height: 37px;">
               <button type="submit" name="login" class="btn btn-primary">Login</button>
             </div>
           </form>
           <%}%>
-            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-              <div class="navbar-nav">
-                <a class="nav-item nav-link" href="/urls">My URLs</a>
-                <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-              </div>
-            </div>
   </nav>
 </header>
