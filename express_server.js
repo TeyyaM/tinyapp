@@ -53,7 +53,6 @@ app.get("/urls", (req, res) => {
 // For Logins!
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
-  console.log(req.body.username);
   res.redirect("/urls");
 });
 
