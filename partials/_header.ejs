@@ -16,18 +16,13 @@
         Logged in as: <%=user.email%>
       </a>
       <form action="/logout" method="POST">
-        <button type="submit" name="logout" class="btn btn-primary">Logout</button>
+        <button type="submit" name="logout" class="btn btn-primary"
+          style="color: #dbdbdb; background-color: #6d16c4;">Logout</button>
       </form>
       <%}%>
         <%if (!user) {%>
-          <form class="form-center" action="/login" method="POST">
-            <div class="form-group mb-2">
-              <label for="username"></label>
-              <input class="form-control-center" type="text" name="username" placeholder="username"
-                style="width: 300px; height: 37px;">
-              <button type="submit" name="login" class="btn btn-primary">Login</button>
-            </div>
-          </form>
+          <a class="nav-item nav-link" href="/register" style="color: #dbdbdb; background-color: #520e97;">Register</a>
+          <a class="nav-item nav-link" href="/login" style="color: #dbdbdb; background-color: #6d16c4;">Login</a>
           <%}%>
   </nav>
 </header>

@@ -34,6 +34,15 @@ const validRandom = (database) => {
   return string;
 }
 
+const emailCheck = (email) => {
+  for (userkey in users) {
+    if (users[userkey].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 // Objects! 
 
 const urlDatabase = {
@@ -80,20 +89,34 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let newId = validRandom(users);
-  users[newId] = {
-    id: newId,
-    email: req.body.email,
-    password: req.body.password
+  const email = req.body.email;
+  const password = req.body.password;
+  if (email === "" || password === "" || emailCheck(email)) {
+    res.status(400).send('Invalid entry!');
+  } else {
+    let newId = validRandom(users);
+    users[newId] = {
+      id: newId,
+      email: email,
+      password: password
+    }
+    res.cookie('user_id', newId);
+    res.redirect("/urls");
   }
-  res.cookie('user_id', newId);
+});
+
+// For Logins!
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
   res.redirect("/urls");
 });
 
-// For Logins! WILL NEED TO EDIT
-app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect("/urls");
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render('login', templateVars);
 });
 
 // For Logouts!
