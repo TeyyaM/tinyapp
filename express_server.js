@@ -36,16 +36,24 @@ const urlDatabase = {
 // Home page
 
 app.get("/", (req, res) => {
-  res.render("Hello!");
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("Hello!", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
   res.render('urls_index', templateVars);
 });
 
 // For Logins!
 app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  console.log(req.body.username);
   res.redirect("/urls");
 });
 
@@ -70,7 +78,10 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render('urls_new');
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render('urls_new', templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -78,7 +89,11 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
   res.render("urls_show", templateVars);
 });
 
