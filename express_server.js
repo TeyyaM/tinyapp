@@ -44,6 +44,11 @@ app.get("/urls", (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// For Logins!
+app.post("/login", (req, res) => {
+  res.redirect("/urls");
+});
+
 // Adds new shortURL:longURL key:value pair and redirects
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString()
