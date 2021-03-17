@@ -50,6 +50,14 @@ app.get("/urls", (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// For Registering!
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render('register', templateVars);
+});
+
 // For Logins!
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
