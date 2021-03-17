@@ -10,41 +10,62 @@ app.use(cookieParser());
 const PORT = 8080; // default port 8080
 
 const generateRandomString = () => {
-  let shortURL = "";
+  let string = "";
   let alphabet = "abcdefghijklmnopqrstuvwxyz";
-  while (shortURL.length < 6) {
+  while (string.length < 6) {
     let num = Math.floor(Math.random() * 36);
     if (num <= 9) {
-      shortURL += num;
+      string += num;
     } else {
       num -= 10;
-      shortURL += alphabet.charAt(num);
+      string += alphabet.charAt(num);
     }
   }
-  if (shortURL in urlDatabase) {
-    shortURL = generateRandomString();
-  }
-  return shortURL;
+  return string;
 };
+// Makes sure the string isn't already a key in the specified database
+const validRandom = (database) => {
+  let string = generateRandomString();
+  if (string in database) {
+    while (string in database) {
+      string = generateRandomString();
+    }
+  }
+  return string;
+}
 
-// Saved urls
+// Objects! 
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
 };
 
 // Home page
 
 app.get("/", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("Hello!", templateVars);
 });
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
@@ -53,12 +74,23 @@ app.get("/urls", (req, res) => {
 // For Registering!
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render('register', templateVars);
 });
 
-// For Logins!
+app.post("/register", (req, res) => {
+  let newId = validRandom(users);
+  users[newId] = {
+    id: newId,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie('user_id', newId);
+  res.redirect("/urls");
+});
+
+// For Logins! WILL NEED TO EDIT
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect("/urls");
@@ -72,7 +104,7 @@ app.post("/logout", (req, res) => {
 
 // Adds new shortURL:longURL key:value pair and redirects
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString()
+  let shortURL = validRandom(urlDatabase);
   urlDatabase[shortURL] = `http://${req.body.longURL}`;
   res.redirect(`/urls/${shortURL}`);
 });
@@ -92,7 +124,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render('urls_new', templateVars);
 });
@@ -103,7 +135,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };

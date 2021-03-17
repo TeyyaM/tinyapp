@@ -11,15 +11,15 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <%if (username) {%>
+    <%if (user) {%>
       <a class="text-right" style="margin: 1em;">
-        Logged in as: <%=username%>
+        Logged in as: <%=user.email%>
       </a>
       <form action="/logout" method="POST">
         <button type="submit" name="logout" class="btn btn-primary">Logout</button>
       </form>
       <%}%>
-        <%if (!username) {%>
+        <%if (!user) {%>
           <form class="form-center" action="/login" method="POST">
             <div class="form-group mb-2">
               <label for="username"></label>
