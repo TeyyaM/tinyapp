@@ -6,7 +6,8 @@ const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 // Our helper.js functions
 const { getUserByEmail,
-  urlsForUser } = require("./helpers");
+  urlsForUser,
+  validRandom } = require("./helpers");
 
 // Middleware
 app.set("view engine", "ejs");
@@ -19,32 +20,6 @@ app.use(cookieSession({
 
 const PORT = 8080; // default port 8080
 
-// Makes sure the string isn't already a key in the specified database
-const validRandom = (database) => {
-  // generates a random string that might already be in use
-  const generateRandomString = () => {
-    let string = "";
-    let alphabet = "abcdefghijklmnopqrstuvwxyz";
-    while (string.length < 6) {
-      let num = Math.floor(Math.random() * 36);
-      if (num <= 9) {
-        string += num;
-      } else {
-        num -= 10;
-        string += alphabet.charAt(num);
-      }
-    }
-    return string;
-  };
-  // Makes sure string isn't in use
-  let string = generateRandomString();
-  if (string in database) {
-    while (string in database) {
-      string = generateRandomString();
-    }
-  }
-  return string;
-}
 // Objects! 
 
 const urlDatabase = {
@@ -140,8 +115,11 @@ app.post("/logout", (req, res) => {
 
 // Adds new shortURL:longURL key:value pair and redirects
 app.post("/urls", (req, res) => {
-  let shortURL = validRandom(urlDatabase);
-  urlDatabase[shortURL].longURL = `http://${req.body.longURL}`;
+  const shortURL = validRandom(urlDatabase);
+  urlDatabase[shortURL] = {
+    longURL: `http://${req.body.longURL}`,
+    userID: req.session.user_id
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 
