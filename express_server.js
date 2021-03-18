@@ -2,34 +2,41 @@ const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session')
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+// Our helper.js functions
+const { getUserByEmail,
+  urlsForUser } = require("./helpers");
+
+// Middleware
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
-  name: 'session',
+  name: "session",
   keys: ["key1", "key2", "key3", "key4", "key5"],
   maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
 }))
 
 const PORT = 8080; // default port 8080
 
-const generateRandomString = () => {
-  let string = "";
-  let alphabet = "abcdefghijklmnopqrstuvwxyz";
-  while (string.length < 6) {
-    let num = Math.floor(Math.random() * 36);
-    if (num <= 9) {
-      string += num;
-    } else {
-      num -= 10;
-      string += alphabet.charAt(num);
-    }
-  }
-  return string;
-};
 // Makes sure the string isn't already a key in the specified database
 const validRandom = (database) => {
+  // generates a random string that might already be in use
+  const generateRandomString = () => {
+    let string = "";
+    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+    while (string.length < 6) {
+      let num = Math.floor(Math.random() * 36);
+      if (num <= 9) {
+        string += num;
+      } else {
+        num -= 10;
+        string += alphabet.charAt(num);
+      }
+    }
+    return string;
+  };
+  // Makes sure string isn't in use
   let string = generateRandomString();
   if (string in database) {
     while (string in database) {
@@ -38,27 +45,6 @@ const validRandom = (database) => {
   }
   return string;
 }
-
-// Checks if email is already registered and returns the account id if it is
-const getUserByEmail = (email, userDatabase) => {
-  const users = userDatabase;
-  for (let userkey in users) {
-    if (users[userkey].email === email) {
-      return userkey;
-    }
-  }
-  return false;
-};
-
-const urlsForUser = (id) => {
-  const shortURLArr = [];
-  for (let shortURL in urlDatabase) {
-    shortURLArr.push(shortURL);
-  }
-  const filteredURLs = shortURLArr.filter(shortURL => urlDatabase[shortURL].userID === id);
-  return filteredURLs;
-};
-
 // Objects! 
 
 const urlDatabase = {
@@ -95,7 +81,7 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     user: users[userId],
     urls: urlDatabase,
-    userURLs: urlsForUser(userId)
+    userURLs: urlsForUser(userId, urlDatabase)
   };
   res.render("urls_index", templateVars);
 });
@@ -197,7 +183,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userId = req.session.user_id;
-  const userURLs = urlsForUser(userId);
+  const userURLs = urlsForUser(userId, urlDatabase);
 
   const templateVars = {
     user: users[userId],
