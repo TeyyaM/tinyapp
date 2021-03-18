@@ -5,9 +5,11 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 // Our helper.js functions
-const { getUserByEmail,
+const {
+  getUserByEmail,
   urlsForUser,
-  validRandom } = require("./helpers");
+  validRandom
+} = require("./helpers");
 
 // Middleware
 app.set("view engine", "ejs");

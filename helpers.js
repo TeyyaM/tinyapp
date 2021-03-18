@@ -9,6 +9,7 @@ const getUserByEmail = (email, userDatabase) => {
   return undefined;
 };
 
+// Returns an array with all of a user's shortURLs
 const urlsForUser = (id, urlDatabase) => {
   const shortURLArr = [];
   for (let shortURL in urlDatabase) {
@@ -18,7 +19,7 @@ const urlsForUser = (id, urlDatabase) => {
   return filteredURLs;
 };
 
-// Makes sure the string isn't already a key in the specified database
+// Generates 6 character string that isn't already a key in the specified database
 const validRandom = (database) => {
   // generates a random string that might already be in use
   const generateRandomString = () => {
