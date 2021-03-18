@@ -1,9 +1,9 @@
-const morgan = require('morgan');
+const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser')
-app.set('view engine', 'ejs');
+const cookieParser = require("cookie-parser")
+app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -23,7 +23,7 @@ const generateRandomString = () => {
   }
   return string;
 };
-// Makes sure the string isn't already a key in the specified database
+// Makes sure the string isn"t already a key in the specified database
 const validRandom = (database) => {
   let string = generateRandomString();
   if (string in database) {
@@ -34,10 +34,11 @@ const validRandom = (database) => {
   return string;
 }
 
+// Checks if email is already registered and returns the account id if it is
 const emailCheck = (email) => {
   for (userkey in users) {
     if (users[userkey].email === email) {
-      return true;
+      return userkey;
     }
   }
   return false;
@@ -77,7 +78,7 @@ app.get("/urls", (req, res) => {
     user: users[req.cookies["user_id"]],
     urls: urlDatabase
   };
-  res.render('urls_index', templateVars);
+  res.render("urls_index", templateVars);
 });
 
 // For Registering!
@@ -85,14 +86,14 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
-  res.render('register', templateVars);
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (email === "" || password === "" || emailCheck(email)) {
-    res.status(400).send('Invalid entry!');
+    res.status(400).send("Invalid entry!");
   } else {
     let newId = validRandom(users);
     users[newId] = {
@@ -100,7 +101,7 @@ app.post("/register", (req, res) => {
       email: email,
       password: password
     }
-    res.cookie('user_id', newId);
+    res.cookie("user_id", newId);
     res.redirect("/urls");
   }
 });
@@ -109,19 +110,25 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  res.redirect("/urls");
+  const userId = emailCheck(email)
+  if (!userId || users[userId].password !== password) {
+    res.status(403).send("Invalid entry! Double-check your spelling or register instead!!");
+  } else {
+    res.cookie("user_id", userId);
+    res.redirect("/urls");
+  }
 });
 
 app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
-  res.render('login', templateVars);
+  res.render("login", templateVars);
 });
 
 // For Logouts!
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -149,7 +156,7 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
-  res.render('urls_new', templateVars);
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
