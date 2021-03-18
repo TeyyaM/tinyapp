@@ -2,11 +2,15 @@ const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["key1", "key2", "key3", "key4", "key5"],
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+}))
 
 const PORT = 8080; // default port 8080
 
@@ -36,7 +40,8 @@ const validRandom = (database) => {
 }
 
 // Checks if email is already registered and returns the account id if it is
-const emailCheck = (email) => {
+const getUserByEmail = (email, userDatabase) => {
+  const users = userDatabase;
   for (let userkey in users) {
     if (users[userkey].email === email) {
       return userkey;
@@ -80,13 +85,13 @@ const users = {
 
 app.get("/", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
   res.render("Hello!", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const templateVars = {
     user: users[userId],
     urls: urlDatabase,
@@ -98,7 +103,7 @@ app.get("/urls", (req, res) => {
 // For Registering!
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
   res.render("register", templateVars);
 });
@@ -107,7 +112,7 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  if (email === "" || password === "" || emailCheck(email)) {
+  if (email === "" || password === "" || getUserByEmail(email, users)) {
     res.status(400).send("Invalid entry!");
   } else {
     let newId = validRandom(users);
@@ -116,7 +121,7 @@ app.post("/register", (req, res) => {
       email: email,
       password: hashedPassword
     }
-    res.cookie("user_id", newId);
+    req.session.user_id = newId;
     res.redirect("/urls");
   }
 });
@@ -125,25 +130,25 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userId = emailCheck(email)
+  const userId = getUserByEmail(email, users);
   if (!userId || !bcrypt.compareSync(password, users[userId].password)) {
     res.status(403).send("Invalid entry! Double-check your spelling or register instead!!");
   } else {
-    res.cookie("user_id", userId);
+    req.session.user_id = userId;
     res.redirect("/urls");
   }
 });
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
   res.render("login", templateVars);
 });
 
 // For Logouts!
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -156,7 +161,7 @@ app.post("/urls", (req, res) => {
 
 // Deletes a shortURL:longURL and redirects
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID === userId) {
     delete urlDatabase[shortURL]
@@ -166,7 +171,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // Updates a shortURL:longURL and redirects
 app.post("/urls/:shortURL", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
   const newLongURL = req.body.newLongURL;
   if (urlDatabase[shortURL].userID === userId) {
@@ -177,7 +182,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
   if (!templateVars.user) {
     res.redirect("/login");
@@ -191,7 +196,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const userURLs = urlsForUser(userId);
 
   const templateVars = {
