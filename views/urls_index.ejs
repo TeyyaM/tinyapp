@@ -14,36 +14,41 @@
 <body>
   <%- include('../partials/_header') %>
     <main style="margin: 1em;">
-      <h3>Current URLs</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Short URL</th>
-            <th scope="col">Long URL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% for(let shortURL of userURLs) { %>
+      <%if (user) {%>
+        <h3>Current URLs</h3>
+        <table class="table">
+          <thead>
             <tr>
-              <td>
-                <%= shortURL %>
-              </td>
-              <td>
-                <%= urls[shortURL].longURL %>
-              </td>
-              <td>
-                <a href=<%=`/urls/${shortURL}`%>>Edit</a>
-              </td>
-              <td>
-                <form type="button" method="POST" action=<%=`/urls/${shortURL}/delete`%>>
-                  <button type="submit" name="delete" class="btn btn-primary"
-                    style="color: #c10303; background-color: #c1030300; border-color:#c10303;">Delete</button>
-                </form>
-              </td>
+              <th scope="col">Short URL</th>
+              <th scope="col">Long URL</th>
             </tr>
-            <% } %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% for(let shortURL of userURLs) { %>
+              <tr>
+                <td>
+                  <%= shortURL %>
+                </td>
+                <td>
+                  <%= urls[shortURL].longURL %>
+                </td>
+                <td>
+                  <a href=<%=`/urls/${shortURL}`%>>Edit</a>
+                </td>
+                <td>
+                  <form type="button" method="POST" action=<%=`/urls/${shortURL}/delete`%>>
+                    <button type="submit" name="delete" class="btn btn-primary"
+                      style="color: #c10303; background-color: #c1030300; border-color:#c10303;">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <% } %>
+                <%} else {%>
+                  <h1 class="card-header">Login or Register!</h1>
+                  <h3 class="card-text">Make an account or login to make and edit your tinyURLs!</h3>
+                  <%}%>
+          </tbody>
+        </table>
     </main>
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
