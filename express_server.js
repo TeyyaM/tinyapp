@@ -2,7 +2,8 @@ const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -64,16 +65,18 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2a$10$3EBiIr7hoUO93a/Sl73QAeJKvIaNHm9waACOcxHf956xr6yfXV1EG"
+    // password: "purple"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "$2a$10$A9TJqq7iEy31koWXRVXrh.3W2YZdc8CCWHcgKyqK4/KTzulQhlSEi"
+    // password: "dish"
   }
 };
 
-// Home page
+// Home page (IS BROKEN)
 
 app.get("/", (req, res) => {
   const templateVars = {
@@ -103,6 +106,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "" || password === "" || emailCheck(email)) {
     res.status(400).send("Invalid entry!");
   } else {
@@ -110,7 +114,7 @@ app.post("/register", (req, res) => {
     users[newId] = {
       id: newId,
       email: email,
-      password: password
+      password: hashedPassword
     }
     res.cookie("user_id", newId);
     res.redirect("/urls");
@@ -122,7 +126,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const userId = emailCheck(email)
-  if (!userId || users[userId].password !== password) {
+  if (!userId || !bcrypt.compareSync(password, users[userId].password)) {
     res.status(403).send("Invalid entry! Double-check your spelling or register instead!!");
   } else {
     res.cookie("user_id", userId);
