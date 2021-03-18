@@ -14,7 +14,7 @@
 <body>
   <%- include('../partials/_header') %>
     <main style="margin: 1em;">
-      <h3>My URLs</h3>
+      <h3>Current URLs</h3>
       <table class="table">
         <thead>
           <tr>
@@ -23,19 +23,19 @@
           </tr>
         </thead>
         <tbody>
-          <% for(let url in urls) { %>
+          <% for(let shortURL of userURLs) { %>
             <tr>
               <td>
-                <%= url %>
+                <%= shortURL %>
               </td>
               <td>
-                <%= urls[url] %>
+                <%= urls[shortURL].longURL %>
               </td>
               <td>
-                <a href=<%=`/urls/${url}`%>>Edit</a>
+                <a href=<%=`/urls/${shortURL}`%>>Edit</a>
               </td>
               <td>
-                <form type="button" method="POST" action=<%=`/urls/${url}/delete`%>>
+                <form type="button" method="POST" action=<%=`/urls/${shortURL}/delete`%>>
                   <button type="submit" name="delete" class="btn btn-primary"
                     style="color: #c10303; background-color: #c1030300; border-color:#c10303;">Delete</button>
                 </form>

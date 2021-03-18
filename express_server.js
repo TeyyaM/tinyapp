@@ -23,7 +23,7 @@ const generateRandomString = () => {
   }
   return string;
 };
-// Makes sure the string isn"t already a key in the specified database
+// Makes sure the string isn't already a key in the specified database
 const validRandom = (database) => {
   let string = generateRandomString();
   if (string in database) {
@@ -36,7 +36,7 @@ const validRandom = (database) => {
 
 // Checks if email is already registered and returns the account id if it is
 const emailCheck = (email) => {
-  for (userkey in users) {
+  for (let userkey in users) {
     if (users[userkey].email === email) {
       return userkey;
     }
@@ -44,11 +44,20 @@ const emailCheck = (email) => {
   return false;
 };
 
+const urlsForUser = (id) => {
+  const shortURLArr = [];
+  for (let shortURL in urlDatabase) {
+    shortURLArr.push(shortURL);
+  }
+  const filteredURLs = shortURLArr.filter(shortURL => urlDatabase[shortURL].userID === id);
+  return filteredURLs;
+};
+
 // Objects! 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { "longURL": "http://www.lighthouselabs.ca", "userID": "userRandomID" },
+  "9sm5xK": { "longURL": "http://www.google.com", "userID": "userRandomID" }
 };
 
 const users = {
@@ -74,9 +83,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
   const templateVars = {
-    user: users[req.cookies["user_id"]],
-    urls: urlDatabase
+    user: users[userId],
+    urls: urlDatabase,
+    userURLs: urlsForUser(userId)
   };
   res.render("urls_index", templateVars);
 });
@@ -135,7 +146,7 @@ app.post("/logout", (req, res) => {
 // Adds new shortURL:longURL key:value pair and redirects
 app.post("/urls", (req, res) => {
   let shortURL = validRandom(urlDatabase);
-  urlDatabase[shortURL] = `http://${req.body.longURL}`;
+  urlDatabase[shortURL].longURL = `http://${req.body.longURL}`;
   res.redirect(`/urls/${shortURL}`);
 });
 // Deletes a shortURL:longURL and redirects
@@ -146,9 +157,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 // Updates a shortURL:longURL and redirects
 app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL
-  const newLongURL = req.body.newLongURL
-  urlDatabase[shortURL] = newLongURL;
+  const shortURL = req.params.shortURL;
+  const newLongURL = req.body.newLongURL;
+  urlDatabase[shortURL].longURL = newLongURL;
   res.redirect("/urls");
 });
 
@@ -156,6 +167,9 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
+  if (!templateVars.user) {
+    res.redirect("/login");
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -164,17 +178,21 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const userId = req.cookies["user_id"];
   const templateVars = {
-    user: users[req.cookies["user_id"]],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    user: users[userId],
+    shortURL,
+    longURL: urlDatabase[shortURL].longURL,
+    userURLs: urlsForUser(userId)
   };
   res.render("urls_show", templateVars);
 });
 
 // Redirects to the longURL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
+  const shortURL = req.url.slice(3);
+  const longURL = urlDatabase[shortURL].longURL
   res.redirect(longURL);
 });
 
