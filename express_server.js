@@ -44,13 +44,14 @@ const users = {
   }
 };
 
-// Home page (IS BROKEN)
+// Home page redirects
 
 app.get("/", (req, res) => {
-  const templateVars = {
-    user: users[req.session.user_id]
-  };
-  res.render("Hello!", templateVars);
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls", (req, res) => {
@@ -65,6 +66,9 @@ app.get("/urls", (req, res) => {
 
 // For Registering!
 app.get("/register", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  }
   const templateVars = {
     user: users[req.session.user_id]
   };
@@ -164,7 +168,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userId = req.session.user_id;
   const userURLs = urlsForUser(userId, urlDatabase);
-
   const templateVars = {
     user: users[userId],
     shortURL,
@@ -172,6 +175,7 @@ app.get("/urls/:shortURL", (req, res) => {
     belongsToUser: userURLs.includes(shortURL)
   };
   res.render("urls_show", templateVars);
+
 });
 
 // Redirects to the longURL

@@ -30,11 +30,15 @@
             </div>
           </form>
           <div class="card-footer text-muted"></div>
-          <%} else {%>
-            <h1 class="card-header">Login or Register!</h1>
-            <h3 class="card-text">Make an account or login to make and edit your tinyURLs!</h3>
-            <%}%>
-              <!-- new -->
+          <%} else if (user) {%>
+            <h1 class="card-header">Sorry!</h1>
+            <h3 class="card-text">This tinyURL belongs to someone else! You can make your own that links to the same
+              website, though!</h3>
+            <%} else {%>
+              <h1 class="card-header">Login or Register!</h1>
+              <h3 class="card-text">Make an account or login to make and edit your own tinyURLs!</h3>
+              <%}%>
+                <!-- new -->
         </div>
       </div>
       <!-- Bootstrap JS -->
