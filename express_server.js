@@ -1,4 +1,3 @@
-const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
@@ -18,11 +17,11 @@ app.use(cookieSession({
   name: "session",
   keys: ["key1", "key2", "key3", "key4", "key5"],
   maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
-}))
+}));
 
 const PORT = 8080; // default port 8080
 
-// Objects! 
+// Databases!
 
 const urlDatabase = {
   "b2xVn2": { "longURL": "http://www.lighthouselabs.ca", "userID": "userRandomID" },
@@ -87,7 +86,7 @@ app.post("/register", (req, res) => {
       id: newId,
       email: email,
       password: hashedPassword
-    }
+    };
     req.session.user_id = newId;
     res.redirect("/urls");
   }
@@ -125,7 +124,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {
     longURL: `http://${req.body.longURL}`,
     userID: req.session.user_id
-  }
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -134,7 +133,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID === userId) {
-    delete urlDatabase[shortURL]
+    delete urlDatabase[shortURL];
   }
   res.redirect("/urls");
 });
@@ -181,7 +180,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // Redirects to the longURL
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.url.slice(3);
-  const longURL = urlDatabase[shortURL].longURL
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
